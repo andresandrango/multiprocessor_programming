@@ -4,6 +4,8 @@ import org.junit.Test;
 import src.main.java.com.example.cp.FilterLock;
 import src.main.java.com.example.cp.PetersonLock;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -48,32 +50,40 @@ public class LockTest {
     public void test_success_with_regular_lock() {
         Lock lock = new ReentrantLock(true);
 
-        lockTestFactory(lock);
+        lockTestFactory(lock, 2);
     }
 
     @Test
     public void test_success_with_filterlock() {
         Lock lock = new FilterLock(2);
 
-        lockTestFactory(lock);
+        lockTestFactory(lock, 2);
+    }
+
+    @Test
+    public void test_success_with_filterlock_gt_2() {
+        Lock lock = new FilterLock(10);
+
+        lockTestFactory(lock, 10);
     }
 
     @Test
     public void test_success_with_peterson_lock() {
         Lock lock = new PetersonLock();
 
-        lockTestFactory(lock);
+        lockTestFactory(lock, 2);
     }
 
-    void lockTestFactory(Lock lock) {
+    void lockTestFactory(Lock lock, int n){
 
-        MyRunnable r1 = new MyRunnable(lock, "abcde");
-        MyRunnable r2 = new MyRunnable(lock, "xyz");
+        List<Thread> threads = new ArrayList<>();
+        List<MyRunnable> runnables = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            runnables.add(new MyRunnable(lock, String.valueOf(i) + "abc"));
+            threads.add(new Thread(runnables.get(i), String.valueOf(i)));
+        }
 
-        Thread A = new Thread(r1, "0");
-        Thread B = new Thread(r2, "1");
-        A.start();
-        B.start();
+        threads.forEach(Thread::start);
 
         try {
             Thread.sleep(3000);
@@ -81,7 +91,10 @@ public class LockTest {
             System.out.println("issues with sleep" + ex);
         }
 
-        assert Objects.equals(r1.message, "");
-        assert Objects.equals(r2.message, "");
+        runnables.forEach(r -> {
+            assert Objects.equals(r.message, "");
+        });
+
+
     }
 }

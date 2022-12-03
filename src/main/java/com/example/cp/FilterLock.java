@@ -6,8 +6,8 @@ import java.util.concurrent.locks.Lock;
 
 public class FilterLock implements Lock {
 
-    int [] level;
-    int [] victim;
+    volatile int [] level;
+    volatile int [] victim;
 
     int n;
 
