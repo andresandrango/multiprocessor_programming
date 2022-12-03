@@ -6,12 +6,14 @@ import java.util.concurrent.locks.Lock;
 
 public class PetersonLock implements Lock {
 
+    // Note: Not pointed out in the chapter 2 example but these have to be set to "volatile"
+    // TODO write the explanation
     private volatile boolean[] flag = new boolean[2];
     private volatile int victim;
 
     @Override
     public void lock() {
-        log("lock");
+        // Unlike the book, the threads for this to work MUST be initialized with names "0" and "1"
         int i = Integer.parseInt(Thread.currentThread().getName());
         int j = 1 - i;
 
@@ -19,7 +21,6 @@ public class PetersonLock implements Lock {
         victim = i;             // you go first
 
         while (flag[j] && victim == i) {} // wait
-        log("done waiting");
     }
 
 
@@ -27,13 +28,9 @@ public class PetersonLock implements Lock {
     public void unlock() {
         int i = Integer.parseInt(Thread.currentThread().getName());
         flag[i] = false;
-        log("unlock");
     }
 
-    void log(String str) {
-//        System.out.printf("[%s:%s] flag: %s\n", Thread.currentThread().getName(), str, Arrays.toString(flag));
-//        System.out.printf("[%s:%s] victim: %s\n", Thread.currentThread().getName(), str, victim);
-    }
+    // We don't need to implement the rest of Lock functions
 
     @Override
     public void lockInterruptibly() throws InterruptedException {

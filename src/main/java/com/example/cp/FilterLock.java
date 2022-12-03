@@ -22,34 +22,19 @@ public class FilterLock implements Lock {
 
     @Override
     public void lock() {
+        // Unlike the book, the threads for this to work MUST be initialized with names "0" and "1"
         int me = Integer.parseInt(Thread.currentThread().getName());
 
         for (int i = 1; i < n; i++) {
             level[me] = i;
             victim[i] = me;
 
-            while (atLeastOne(me, i)) {
-//                System.out.printf("[%s] waiting ...\n", Thread.currentThread().getName());
-                printme();
-            } // wait
+            while (atLeastOne(me, i)) {} // wait
         }
     }
 
-    void printme() {
-//        System.out.print("levels:");
-//        for (int l :level) {
-//            System.out.printf("%d,", l);
-//        }
-//        System.out.println("");
-//
-//        System.out.print("victim:");
-//        for (int v :victim) {
-//            System.out.printf("%d,", v);
-//        }
-//        System.out.println("");
-    }
-
     boolean atLeastOne(int me, int i) {
+        // This is not pointed in the book but k here has to start at i + 1 otherwise it does not work!
         for (int k = i + 1; k < n; k++) {
             if (k != me && level[k] >= i && victim[i] == me) {
                 return true;
@@ -64,6 +49,7 @@ public class FilterLock implements Lock {
         level[me] = 0;
     }
 
+    // We don't need to implement the rest of Lock functions
     @Override
     public Condition newCondition() {
         return null;
